@@ -1,0 +1,933 @@
+{
+  "name": "Qr Test",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Проанализируй изображение\n(размер изображения: {{ $('Set fields').item.json.image_width }}x{{ $('Set fields').item.json.image_height }} px).\n\nТвоя задача — определить:\n1) оптимальный размер QR-кода,\n2) координаты (x, y) его размещения на изображении.\n\nСистема координат:\n- Точка (0, 0) находится в верхнем левом углу изображения.\n- Ось X направлена вправо, ось Y направлена вниз.\n- Координаты (qr_x, qr_y) обозначают верхний левый угол QR-кода.\n- QR-код с размером qr_size занимает область:\n  по X: от qr_x до qr_x + qr_size,\n  по Y: от qr_y до qr_y + qr_size.\n- QR-код должен полностью помещаться внутри изображения.\n\nТребования к размеру QR-кода:\n- Размер должен выбираться так, чтобы QR-код был хорошо виден и читаем на итоговом изображении (примерно 10-20% от размера изображения).\n- Размер должен выбираться так, чтобы QR-код полностью помещался в найденную свободную область.\n- Не выбирай максимально возможный размер, если свободная область ограничена.\n\nТребования к размещению:\n- НЕ закрывай текст, лица, людей, животных, логотипы и другие важные объекты.\n- НЕ перекрывай другие QR-коды, если они присутствуют.\n- QR-код может располагаться только на визуально свободных и однородных областях (фон, небо, вода, пустые поверхности).\n- Предпочтительно использовать углы или края изображения, если они свободны.\n\nИспользуй только абсолютные координаты в пикселях.\nНе используй центр QR-кода или относительные координаты.\n\nВерни ТОЛЬКО чистый JSON (без markdown, без ``` и без текста до или после):\n\n{\n  \"qr_x\": number,\n  \"qr_y\": number,\n  \"qr_size\": number,\n  \"image_width\": {{ $('Set fields').item.json.image_width }},\n  \"image_height\": {{ $('Set fields').item.json.image_height }},\n  \"reasoning\": \"Короткое объяснение выбора размера и места (1–2 предложения)\"\n}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "HumanMessagePromptTemplate",
+              "messageType": "imageBinary",
+              "imageDetail": "low"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        5904,
+        3024
+      ],
+      "id": "7d7e5f2e-9d7e-4ea5-b5a1-c56bc93a0303",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Get last item').item.json.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        5504,
+        3024
+      ],
+      "id": "a42e6e5f-e062-40a4-8cc3-82151aa5dcd0",
+      "name": "Get a file",
+      "webhookId": "b100e954-f1dc-4db9-b219-449e6cf8b988",
+      "credentials": {
+        "telegramApi": {
+          "id": "ONsYchi4ZGsOVESn",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-2.5-flash",
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        3376,
+        2544
+      ],
+      "id": "9e139f50-de05-462e-b32a-c64435e4e48e",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "9gGPiwHFogUNK8BZ",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set fields').item.json['ngrok URL'] }}/overlay-qr ",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "payload",
+              "value": "={{ JSON.stringify($('Combine fields').item.json) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        7088,
+        3024
+      ],
+      "id": "29c6015d-acb4-4577-96f4-276e91bcd3a9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Get last item').item.json.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        6848,
+        3024
+      ],
+      "id": "c1fef537-1d2d-446a-aec0-974bc913abc3",
+      "name": "Get a file1",
+      "webhookId": "b100e954-f1dc-4db9-b219-449e6cf8b988",
+      "credentials": {
+        "telegramApi": {
+          "id": "ONsYchi4ZGsOVESn",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Combine fields').item.json.chat_id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        7312,
+        3024
+      ],
+      "id": "f77c9dd9-3c78-4e43-aa0a-9948d808c324",
+      "name": "Send a photo message",
+      "webhookId": "3dc6b90b-8952-4944-8217-2fb8b042f5ff",
+      "credentials": {
+        "telegramApi": {
+          "id": "ONsYchi4ZGsOVESn",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openRouterApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/gemini-2.5-flash\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Return ONLY raw JSON. No markdown, no backticks. Output must be a single valid JSON object.\\n\\nТы выбираешь безопасное место для QR-кода на изображении.\\n\\nПравила:\\n1) Не закрывай лица, людей, животных, текст, логотипы или ключевые объекты.\\n2) Сначала проверяй углы и края.\\n3) Верни только JSON:\\n{\\n  \\\"qr_x\\\": number,\\n  \\\"qr_y\\\": number,\\n  \\\"qr_size\\\": {{ $('Set fields').item.json.qr_size }},\\n  \\\"image_width\\\": {{ $('Set fields').item.json.image_width }},\\n  \\\"image_height\\\": {{ $('Set fields').item.json.image_height }},\\n  \\\"use_background\\\": boolean,\\n  \\\"reasoning\\\": \\\"string\\\"\\n}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": [\n        {\n          \"type\": \"text\",\n          \"text\": \"Analyze image ({{ $('Set fields').item.json.image_width }}x{{ $('Set fields').item.json.image_height }}). QR size: {{ $('Set fields').item.json.qr_size }}. Follow system instructions.\"\n        },\n        {\n          \"type\": \"image_url\",\n          \"image_url\": {\n            \"url\": \"data:{{ $('Get a file').item.binary.data.mimeType }};base64,{{ $('Get a file').item.binary.data.data }}\"\n          }\n        }\n      ]\n    }\n  ],\n  \"reasoning\": {\n    \"effort\": \"low\"\n  },\n  \"response_format\": {\n    \"type\": \"json_object\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3440,
+        3008
+      ],
+      "id": "19badf58-c8af-4d30-b885-5faf26988ba6",
+      "name": "HTTP Request1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "9gGPiwHFogUNK8BZ",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Данные:\nimage_width={{ $('Set fields').item.json.image_width }}\nimage_height={{ $('Set fields').item.json.image_height }}\nqr_size={{ $('Set fields').item.json.qr_size }}\n\nВыбери безопасное место для QR. Верни финальный JSON по схеме.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Ты агент по выбору безопасного места для QR на изображении.\n\nОБЯЗАТЕЛЬНОЕ ПРАВИЛО:\n- Перед тем как отвечать пользователю, ВСЕГДА вызови инструмент thinktool ровно один раз.\n- Нельзя отвечать без вызова thinktool. Если thinktool недоступен или вернул ошибку — верни JSON с use_background=true и qr_x/qr_y=0,0 и reasoning=\"thinktool_error\".\n\nПравила выбора места:\n1) Не закрывай лица, людей, животных, текст, логотипы, ключевые объекты и существующие QR-коды.\n2) Сначала проверяй углы и края. Если заняты — ближайшая свободная однородная область.\n3) Избегай центра, если там сюжет/объекты.\n4) Выбирай зону с хорошим контрастом; если фон шумный — use_background=true.\n5) Координаты должны быть внутри:\n   0 <= qr_x <= image_width - qr_size\n   0 <= qr_y <= image_height - qr_size\n\nФинальный ответ пользователю — ТОЛЬКО JSON, без markdown и без текста до/после.\n",
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        3424,
+        2320
+      ],
+      "id": "46b5cc5e-b1a9-48a5-bc04-0ae3ae1ba5d1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "description": "Thinktool: анализ изображения и выбор безопасной зоны для QR.\n\nВход: image_width, image_height, qr_size и (если доступно) информация о найденных объектах/тексте/QR.\nВыход: рекомендация области для QR и флаги читаемости.\n\nВерни только JSON:\n{\n  \"qr_x\": number,\n  \"qr_y\": number,\n  \"qr_size\": number,\n  \"image_width\": number,\n  \"image_height\": number,\n  \"use_background\": boolean,\n  \"reasoning\": \"1–2 предложения\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        3504,
+        2544
+      ],
+      "id": "82ce61b1-6708-456c-b12b-9e09484f25c6",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {
+          "thinking": true,
+          "thinkingBudget": 1024
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        3440,
+        3232
+      ],
+      "id": "2827976c-8235-4fac-87f7-8b4031e77417",
+      "name": "Anthropic Chat Model1",
+      "credentials": {
+        "anthropicApi": {
+          "id": "m0adOUVqNLFaTvCV",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1a8ade55-f728-4508-8979-16c84eecf0d8",
+              "name": "qr_x",
+              "value": "=707",
+              "type": "number"
+            },
+            {
+              "id": "6ee6cf44-20d6-404e-a54e-6fa75a89a878",
+              "name": "qr_y",
+              "value": "=304",
+              "type": "number"
+            },
+            {
+              "id": "97a97717-3745-4b81-9c79-5d4112a12530",
+              "name": "qr_size",
+              "value": "=200",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3408,
+        2752
+      ],
+      "id": "c3724422-a673-4d32-93ad-86b194ae6196",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"qr_x\": 10,\n  \"qr_y\": 15,\n  \"qr_size\": 200,\n  \"image_width\": 12345,\n  \"image_height\": 23412,\n  \"use_background\": false,\n  \"reasoning\": \"1–2 коротких предложения\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        3632,
+        2544
+      ],
+      "id": "e2e1e9f2-47aa-4327-91d0-ea95e17896de",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n{\njson: {\ncontent: JSON.parse($input.first().json.choices[0].message.content)\n}\n}\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3664,
+        3008
+      ],
+      "id": "93842616-9500-45dc-9c16-00327f980fa8",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-5-20250929",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {
+          "thinking": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        5904,
+        3232
+      ],
+      "id": "0b16faeb-138b-46f3-8d8a-06235078d7ca",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "m0adOUVqNLFaTvCV",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Берём data-массив из первого элемента\nconst data = $input.first().json.data;\n\n// Находим кусок с type=\"text\"\nconst textBlock = data.find(x => x.type === 'text')?.text || '';\n\n// Убираем ```json и ``` (и вообще любые ```... в начале)\nconst cleaned = textBlock\n  .replace(/^```(?:json)?\\s*/i, '')\n  .replace(/```$/i, '')\n  .trim();\n\n// Парсим JSON\nconst parsed = JSON.parse(cleaned);\n\n// Возвращаем как нормальные поля\nreturn [{ json: parsed }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6416,
+        3024
+      ],
+      "id": "73fb86d6-29b1-40f2-96ea-802223a7c994",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "content": "# QR Code Placement Workflow\n\n**Назначение:** Автоматическое размещение QR-кода на изображениях с помощью AI\n\n**Как работает:**\n1. Получает фото из Telegram\n2. AI анализирует изображение и находит оптимальное место для QR-кода\n3. Накладывает QR-код через внешний API\n4. Отправляет результат обратно в Telegram",
+        "height": 268,
+        "width": 704,
+        "color": 7
+      },
+      "id": "674853ab-a724-4454-af06-a50efe9e0849",
+      "name": "Sticky Note - Workflow Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5648,
+        2240
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 1. Обработка входных данных\n\n",
+        "height": 504,
+        "width": 1148,
+        "color": 5
+      },
+      "id": "fc34ddcc-e285-4bc9-b8f6-18dd1b548e5a",
+      "name": "Sticky Note - Input Processing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4528,
+        2752
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. AI-анализ изображения\n\n**Basic LLM Chain** → Отправляет изображение в Claude Opus 4.5 с промптом для анализа\n\n**Anthropic Chat Model** → Модель с Extended Thinking анализирует:\n- Расположение важных объектов (лица, текст, логотипы)\n- Свободные области для размещения QR-кода\n- Оптимальные координаты (qr_x, qr_y) и размер\n",
+        "height": 640,
+        "width": 400,
+        "color": 4
+      },
+      "id": "ee5a6441-6c5e-4a12-9a4c-0ff62f0f43ff",
+      "name": "Sticky Note - AI Analysis",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5824,
+        2752
+      ]
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        4384,
+        3024
+      ],
+      "id": "2685a3b8-34d1-44eb-aeb4-f6c4dbc0ea8b",
+      "name": "New message trigger",
+      "webhookId": "3cacaeb1-4eca-40c4-bcfc-cb9dc0442999",
+      "credentials": {
+        "telegramApi": {
+          "id": "ONsYchi4ZGsOVESn",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "message.photo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        4608,
+        3024
+      ],
+      "id": "0d2fbfc0-d13e-4699-9721-cfec9581e345",
+      "name": "Split List"
+    },
+    {
+      "parameters": {
+        "keep": "lastItems"
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        4832,
+        3024
+      ],
+      "id": "ac8de7c8-6ccb-425a-aedd-145987073b03",
+      "name": "Get last item"
+    },
+    {
+      "parameters": {
+        "content": "Извлекает массив фотографий из сообщения Telegram",
+        "height": 288,
+        "width": 176,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4576,
+        2896
+      ],
+      "id": "b6dc69a2-e0bb-49e1-90db-88f4590994c4",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Берем последний элемент",
+        "height": 288,
+        "width": 160,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4800,
+        2896
+      ],
+      "id": "b0f8c7fe-0b9c-4601-a92a-b4fa1229fd81",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Опционально можем посчитать размер qr кода в % от размера картинки",
+        "height": 288,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5008,
+        2896
+      ],
+      "id": "e50d79b9-62f2-4c0a-bbab-0f78f9dba899",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Процент от размера изображения\nconst qrPercent = 20; \n// Получаем размеры из предыдущего узла\nconst width = $input.first().json.width;\nconst height = $input.first().json.height;\n\nif (!width || !height) {\n  throw new Error(\"Missing image dimensions\");\n}\n\n// Вычисляем размер QR-кода от меньшей стороны\nconst smallerSide = Math.min(width, height);\nconst qrSize = Math.floor(smallerSide * (qrPercent / 100));\n\n// Возвращаем результат\nreturn {\n  json: {\n    image_width: width,\n    image_height: height,\n    qr_size: qrSize,\n    qr_percent: qrPercent\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5056,
+        3024
+      ],
+      "id": "18ad7e1a-fa65-4db7-a6fa-b1c69162dedd",
+      "name": "Get qr size (optional)"
+    },
+    {
+      "parameters": {
+        "content": "Собираем необходимые поля",
+        "height": 288,
+        "width": 160,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5248,
+        2896
+      ],
+      "id": "8348ad28-3579-4f37-b53b-b750eee05b18",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Скачиваем изображение",
+        "height": 288,
+        "width": 160,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5472,
+        2896
+      ],
+      "id": "98ca539a-2a5d-47a4-b70d-855bfbee75b4",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Парсим ответ от LLM",
+        "height": 288,
+        "width": 176,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6384,
+        2912
+      ],
+      "id": "f54647f9-5968-45a0-aaaf-561b7fe7ad5d",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "Собираем все даны для отправки в API",
+        "height": 288,
+        "width": 192,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6592,
+        2912
+      ],
+      "id": "bf1afd36-f7c6-4d00-8518-78dbf8ed13ac",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de8bf0ed-1344-4329-8ef9-1b6d8ff0e217",
+              "name": "qr_x",
+              "value": "={{ $json.qr_x }}",
+              "type": "number"
+            },
+            {
+              "id": "02ded6a0-63f1-4812-a1cd-69d286f81bf4",
+              "name": "qr_y",
+              "value": "={{ $json.qr_y }}",
+              "type": "number"
+            },
+            {
+              "id": "856175df-b79e-47d6-84f6-65205e5d5dfe",
+              "name": "qr_size",
+              "value": "={{ $json.qr_size }}",
+              "type": "number"
+            },
+            {
+              "id": "3c9fe72b-0355-4920-8531-0d159022da12",
+              "name": "reasoning",
+              "value": "={{ $json.reasoning }}",
+              "type": "string"
+            },
+            {
+              "id": "12fd5021-c0b3-4e13-9fd2-2d859547dd42",
+              "name": "image_width",
+              "value": "={{ $json.image_width }}",
+              "type": "number"
+            },
+            {
+              "id": "98a80573-cddb-4ea9-ba6a-2a1be275bb85",
+              "name": "image_height",
+              "value": "={{ $json.image_height }}",
+              "type": "number"
+            },
+            {
+              "id": "b8e4e906-7cbf-4ad4-9bca-ab60a229ed27",
+              "name": "chat_id",
+              "value": "={{ $('New message trigger').item.json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "4eb756cd-494b-4272-92e9-b1348a1f2506",
+              "name": "user_id",
+              "value": "={{ $('New message trigger').item.json.message.from.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6640,
+        3024
+      ],
+      "id": "ffd0d3f6-1304-4487-b918-bf00492bf62a",
+      "name": "Combine fields"
+    },
+    {
+      "parameters": {
+        "content": "Скачиваем изображение",
+        "height": 288,
+        "width": 160,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6816,
+        2912
+      ],
+      "id": "fb1d9767-1dac-4a86-9d9b-ae888da23cf0",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "Отправляет изображение и координаты на внешний API для наложения QR-кода",
+        "height": 288,
+        "width": 208,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        7024,
+        2912
+      ],
+      "id": "3a19ca04-9c54-4e18-a52c-d62699e408cc",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": " Отправляет результат обратно в Telegram чат",
+        "height": 288,
+        "width": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        7264,
+        2912
+      ],
+      "id": "d9fdbfaf-dad9-489f-96bb-29886a269175",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "91a4acc6-7c9f-4e62-95af-5878b0efcc6b",
+              "name": "ngrok URL",
+              "value": "https://fe2b5513396c.ngrok-free.app",
+              "type": "string"
+            },
+            {
+              "id": "8ddccd7a-6d59-4208-8cf2-70c49163290b",
+              "name": "image_width",
+              "value": "={{ $json.image_width }}",
+              "type": "number"
+            },
+            {
+              "id": "418a4355-81d2-40c1-b752-6b66c8a1ea88",
+              "name": "image_height",
+              "value": "={{ $json.image_height }}",
+              "type": "number"
+            },
+            {
+              "id": "ebd9b2f3-64c6-4009-a30e-7fc530b42531",
+              "name": "qr_size",
+              "value": "={{ $json.qr_size }}",
+              "type": "number"
+            },
+            {
+              "id": "73bc04eb-1a6e-4cbb-867b-f34cf82737f8",
+              "name": "qr_percent",
+              "value": "={{ $json.qr_percent }}",
+              "type": "number"
+            },
+            {
+              "id": "b15c76d0-33cd-4012-bcd1-0bddff93725f",
+              "name": "file_id",
+              "value": "={{ $('Get last item').item.json.file_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5280,
+        3024
+      ],
+      "id": "fb250740-e277-4bef-a6d5-78714fa9d67e",
+      "name": "Set fields"
+    },
+    {
+      "parameters": {
+        "content": "# 1. Наложение QR кода и отправка готового изображения\n",
+        "height": 520,
+        "width": 1164,
+        "color": 5
+      },
+      "id": "c11c0e18-5ffe-4f4f-a256-c6f8ad36faa6",
+      "name": "Sticky Note - Input Processing1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6352,
+        2736
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Combine fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New message trigger": {
+      "main": [
+        [
+          {
+            "node": "Split List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split List": {
+      "main": [
+        [
+          {
+            "node": "Get last item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get last item": {
+      "main": [
+        [
+          {
+            "node": "Get qr size (optional)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get qr size (optional)": {
+      "main": [
+        [
+          {
+            "node": "Set fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine fields": {
+      "main": [
+        [
+          {
+            "node": "Get a file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set fields": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "5b3bba04-52bf-4721-9379-e7af3818a058",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7bf4365a2caf69d234372ccd82e383a907e8156da1ff89d7c67a0a2b010a4e3d"
+  },
+  "id": "4R64XogkPhfid4KX",
+  "tags": []
+}

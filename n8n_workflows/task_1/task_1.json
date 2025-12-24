@@ -1,0 +1,1227 @@
+{
+  "name": "My workflow 33",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "2ca3ccc7-2502-4738-b970-414d18d8068f",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        144,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 20,
+        "unit": "seconds"
+      },
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        384,
+        -608
+      ],
+      "id": "f21ee000-8ff6-4f3a-9db4-e17322eb0acf",
+      "webhookId": "48e1f7a3-6c49-4a5f-818d-e126f77b16c0",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "customer_email",
+              "value": "={{$json.customer_email ? $json.customer_email.toLowerCase().trim() : ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set 1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        816,
+        -608
+      ],
+      "id": "02eb8ba0-d1ab-4419-bdad-ed49027912d1"
+    },
+    {
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "amount",
+              "value": "={{Number($json.amount) || 0}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set 2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        -608
+      ],
+      "id": "86839f5f-94e2-40f3-82e0-bed14aedad89"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "currency",
+              "value": "={{($json.currency || '').toUpperCase().trim()}}"
+            },
+            {
+              "name": "status",
+              "value": "={{($json.status || '').trim()}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set 3",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        -608
+      ],
+      "id": "03e5754d-5f8a-4243-9356-87af97222a09"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.customer_email || ''}}",
+              "operation": "contains",
+              "value2": "@"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "IF 1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        -608
+      ],
+      "id": "1ee57ff5-d918-453f-9ee9-8c6dd13d58d8"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.customer_email || ''}}",
+              "operation": "regex",
+              "value2": ".*@.*\\."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "IF 2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        -624
+      ],
+      "id": "c7f01113-fff3-46bf-94db-3b725aa407af"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.amount}}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "IF 3",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2064,
+        -640
+      ],
+      "id": "f5be53d6-5d10-4230-b6bd-76e0476d11d2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.amount}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "IF 4",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2304,
+        -656
+      ],
+      "id": "619ccf5e-91f9-47cc-8fb6-bbb8f6ab8596"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.currency}}",
+              "operation": "equal",
+              "value2": "USD"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "IF 5",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2528,
+        -672
+      ],
+      "id": "81fcf83b-6f3e-43e6-b04f-9749af3c4dfe"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.currency}}",
+              "operation": "equal",
+              "value2": "EUR"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "IF 6",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2688,
+        -752
+      ],
+      "id": "fd12ca3e-61fe-4005-9770-11e6111c8dc4"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "currency_normalized",
+              "value": "={{$json.currency === 'RUR' ? 'RUB' : $json.currency}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set 4",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        2928,
+        -800
+      ],
+      "id": "de03562f-51c6-4173-91c5-7873b58b7ddc"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "currency_final",
+              "value": "={{$json.currency === 'RUR' ? 'RUR' : $json.currency}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set 5",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        3088,
+        -800
+      ],
+      "id": "6790a4fb-f382-43b8-97b7-4922a1bf3758"
+    },
+    {
+      "parameters": {
+        "operation": "toFile",
+        "options": {}
+      },
+      "name": "Spreadsheet File 1",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 1,
+      "position": [
+        3344,
+        -800
+      ],
+      "id": "dcfbb226-6ec9-4993-863f-41527ec7db0d"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Spreadsheet File 2",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 1,
+      "position": [
+        3664,
+        -800
+      ],
+      "id": "a97d7f6e-3d54-4bdc-aa63-23136e2c5a5a"
+    },
+    {
+      "parameters": {
+        "url": "=https://httpbin.org/get?email={{$json.customer_email}}&random={{$json.random_seed}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "HTTP Request 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        3440,
+        -496
+      ],
+      "id": "88864cb2-b749-4544-9095-9da7b0ba4e63"
+    },
+    {
+      "parameters": {
+        "url": "=https://httpbin.org/get?verify={{$json.customer_email}}&timestamp={{$json.timestamp}}",
+        "options": {}
+      },
+      "name": "HTTP Request 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        3616,
+        -496
+      ],
+      "id": "40393e2f-655c-438f-bd1b-4fe83160f0d0"
+    },
+    {
+      "parameters": {
+        "jsCode": "const records = [];\nconst statuses = ['завершен', 'в ожидании', 'возвращен', 'отменен', 'приостановлен', 'неизвестен'];\nconst currencies = ['USD', 'EUR', 'GBP', 'RUR', 'JPY', '', 'INVALID', 'RUB'];\n\nfor (let i = 0; i < 8; i++) {\n  let email = `user${i}@example.com`;\n  if (i % 10 === 0) email = `invalid-email-${i}`;\n  if (i % 25 === 0) email = `USER${i}@EXAMPLE.COM`;\n  if (i % 30 === 0) email = ``;\n  if (i % 45 === 0) email = `user${i}@`;\n\n  let amount = Math.floor(Math.random() * 500);\n  if (i % 50 === 0) amount = -100;\n  if (i % 75 === 0) amount = null;\n  if (i % 100 === 0) amount = \"NaN\";\n  if (i % 125 === 0) amount = \"12.5\";\n\n  let currency = currencies[i % currencies.length];\n  if (i % 200 === 0) currency = null;\n\n  let debugBlob = '';\n  let lorem1mb = '';\n  if (i % 20 === 0) {\n    debugBlob = 'DEBUG: ' + 'x'.repeat(10000);\n    lorem1mb = 'Lorem ipsum '.repeat(5000);\n  }\n\n  records.push({\n    json: {\n      customer_email: email,\n      amount: amount,\n      currency: currency,\n      status: statuses[i % statuses.length],\n      debug_blob: debugBlob,\n      lorem_1mb: lorem1mb,\n      timestamp: new Date().toISOString(),\n      random_seed: Math.random()\n    }\n  });\n}\nreturn records;"
+      },
+      "name": "Generate data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        -608
+      ],
+      "id": "e98064fa-5f2b-4cd1-a431-3062df3d5019"
+    },
+    {
+      "parameters": {
+        "content": "- Создаёт 8 записей с намеренными ошибками для тестирования\n\n- Включает невалидные email, отрицательные суммы, пустые значения",
+        "height": 416,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -848
+      ],
+      "id": "05c62929-1bf8-40d6-a499-3eb0b5f20b9e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "- Случайная перетасовка → обратная сортировка по email\n- Фильтрация по regex для валидных email",
+        "height": 416,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        528,
+        -848
+      ],
+      "id": "10df7acf-c2e0-49c5-bb41-d99fe603be34",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sortedItems = [...items];\n\nsortedItems.sort(() => Math.random() - 0.5);\n\nsortedItems.sort((a, b) => {\n  const emailA = a.json.customer_email || '';\n  const emailB = b.json.customer_email || '';\n  return emailB.localeCompare(emailA);\n});\n\nconst filtered = sortedItems.filter(item => {\n  const email = item.json.customer_email || '';\n  return /^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(email);\n});\n\nreturn filtered;"
+      },
+      "name": "Process data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        -608
+      ],
+      "id": "78deb4c3-33ab-4765-b640-a5a82ebf20e2"
+    },
+    {
+      "parameters": {
+        "content": "Приводит email к lowercase и trim",
+        "height": 320,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        784,
+        -752
+      ],
+      "id": "632ec3e2-0554-4fdb-b361-bc36d2146c89",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "конвертирует amount в число",
+        "height": 320,
+        "width": 166
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        -752
+      ],
+      "id": "a8b4fca4-8b29-43cf-a7ad-f8894dd33dc0",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "нормализует currency и status",
+        "height": 320,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        -752
+      ],
+      "id": "db978343-25a1-4359-9279-ec6d425ad911",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "сумма > 0",
+        "height": 320,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        -784
+      ],
+      "id": "361aabc9-534c-4057-b147-984a6b9c0b19",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "проверка формата email",
+        "height": 320,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        -752
+      ],
+      "id": "012f374d-9b5b-4abc-8e92-0d0445b455bf",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "сумма не пустая",
+        "height": 320,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        -816
+      ],
+      "id": "7e4fb53d-27fb-4bea-bbc9-86fe17aaa6e2",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "проверка наличия @",
+        "height": 320,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        -752
+      ],
+      "id": "9e4bddeb-589b-42af-937a-455a86a94e4b",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "фильтры по валюте (USD/EUR)",
+        "height": 352,
+        "width": 368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2512,
+        -832
+      ],
+      "id": "44e4e3e1-4a22-441a-b7d7-c62e76acd428",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "обрабатывает RUR → RUB",
+        "height": 288,
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2912,
+        -880
+      ],
+      "id": "9cdd28c9-c0b9-49a5-aec2-06933ab9f26e",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "Два узла экспорта в Excel",
+        "height": 336,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3328,
+        -960
+      ],
+      "id": "bf57c253-44eb-410c-890f-3a0dbd745b57",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "Два HTTP-запроса на httpbin.org",
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3360,
+        -560
+      ],
+      "id": "c3332c56-856b-4f84-9565-afa3c8bb6601",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "jsCode": "const records = [];\nconst statuses = ['завершен', 'в ожидании', 'возвращен', 'отменен', 'приостановлен', 'неизвестен'];\nconst currencies = ['USD', 'EUR', 'GBP', 'RUR', 'JPY', '', 'INVALID', 'RUB'];\n\nfor (let i = 0; i < 400; i++) {\n  let email = `user${i}@example.com`;\n  if (i % 10 === 0) email = `invalid-email-${i}`;\n  if (i % 25 === 0) email = `USER${i}@EXAMPLE.COM`;\n  if (i % 30 === 0) email = ``;\n  if (i % 45 === 0) email = `user${i}@`;\n\n  let amount = Math.floor(Math.random() * 500);\n  if (i % 50 === 0) amount = -100;\n  if (i % 75 === 0) amount = null;\n  if (i % 100 === 0) amount = \"NaN\";\n  if (i % 125 === 0) amount = \"12.5\";\n\n  let currency = currencies[i % currencies.length];\n  if (i % 200 === 0) currency = null;\n\n  let debugBlob = '';\n  let lorem1mb = '';\n  if (i % 20 === 0) {\n    debugBlob = 'DEBUG: ' + 'x'.repeat(10000);\n    lorem1mb = 'Lorem ipsum '.repeat(5000);\n  }\n\n  records.push({\n    json: {\n      customer_email: email,\n      amount: amount,\n      currency: currency,\n      status: statuses[i % statuses.length],\n      debug_blob: debugBlob,\n      lorem_1mb: lorem1mb,\n      timestamp: new Date().toISOString(),\n      random_seed: Math.random()\n    }\n  });\n}\nreturn records;"
+      },
+      "name": "Generate data1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        176
+      ],
+      "id": "c2a18466-523e-4651-bf6b-9a21151d9181"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f79e0a6b-a0a8-4967-aacb-b9f2a3efe359",
+              "name": "customer_email",
+              "value": "={{$json.customer_email ? $json.customer_email.toLowerCase().trim() : ''}}",
+              "type": "string"
+            },
+            {
+              "id": "8dab4caf-619b-4c06-b31f-ffb3c98cf554",
+              "name": "amount",
+              "value": "={{Number($json.amount) || 0}}",
+              "type": "number"
+            },
+            {
+              "id": "a34ef790-7108-4500-ada2-94bb722dd43b",
+              "name": "currency",
+              "value": "={{($json.currency || '').toUpperCase().trim()}}",
+              "type": "string"
+            },
+            {
+              "id": "cb4a7b22-335f-4e26-8e8a-497b7b8f8310",
+              "name": "status",
+              "value": "={{($json.status || '').trim()}}",
+              "type": "string"
+            },
+            {
+              "id": "da66d479-36f7-4571-a2a9-7a47f24eec85",
+              "name": "timestamp",
+              "value": "={{ $json.timestamp }}",
+              "type": "string"
+            },
+            {
+              "id": "0cfc80a2-e9af-434b-992d-b0fa31f6220d",
+              "name": "random_seed",
+              "value": "={{ $json.random_seed }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        176
+      ],
+      "id": "699a990c-a84c-4f33-8206-d7a062a5a5c4",
+      "name": "Normalize data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e912ab3e-dbd4-49dd-a386-cbc4d96b3a41",
+              "leftValue": "={{ $json.customer_email }}",
+              "rightValue": "@",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "94383a3c-fc3a-438b-b4c7-fe08c247159c",
+              "leftValue": "={{ $json.customer_email }}",
+              "rightValue": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "10238089-4a1a-4682-a4ba-5e73546331d1",
+              "leftValue": "={{ $json.amount }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "d0e112b1-0dd0-441f-a31b-00de2b7e61da",
+              "leftValue": "={{ $json.amount }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1440,
+        176
+      ],
+      "id": "dfbf9c43-387d-465c-b34c-e78f791e9c24",
+      "name": "Validate data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a5ffe720-3214-457e-963f-e5e40be302ce",
+              "leftValue": "={{ $json.currency }}",
+              "rightValue": "EUR",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "88ac5804-95e1-40d5-bb61-cc5150c8767f",
+              "leftValue": "={{ $json.currency }}",
+              "rightValue": "USD",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1776,
+        160
+      ],
+      "id": "b2ff7be2-c163-4c61-9c0b-59ea43f7e8de",
+      "name": "Validate data1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://httpbin.org/post",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=email",
+              "value": "={{ $json.customer_email }}"
+            },
+            {
+              "name": "amount",
+              "value": "={{ $json.amount }}"
+            },
+            {
+              "name": "currency",
+              "value": "={{ $json.currency }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ $json.timestamp }}"
+            },
+            {
+              "name": "random_seed",
+              "value": "={{ $json.random_seed }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "HTTP Request ",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        2528,
+        64
+      ],
+      "id": "3af4dd0c-dc9b-49c3-8fa8-b95328d6bde5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0c64c7e6-7e4d-4ac7-b3bc-0310ea5ff1ab",
+              "name": "currency_normalized",
+              "value": "={{$json.currency === 'RUR' ? 'RUB' : $json.currency}}",
+              "type": "string"
+            },
+            {
+              "id": "2e76519f-80b5-429c-9206-91836f356ad0",
+              "name": "currency_final",
+              "value": "={{$json.currency === 'RUR' ? 'RUR' : $json.currency}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1232,
+        176
+      ],
+      "id": "5a1707ec-74dd-4f69-8ed9-b906c8f377ea",
+      "name": "Normalize data1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sortedItems = [...items];\n\nsortedItems.sort(() => Math.random() - 0.5);\n\n// sortedItems.sort((a, b) => {\n//   const emailA = a.json.customer_email || '';\n//   const emailB = b.json.customer_email || '';\n//   return emailB.localeCompare(emailA);\n// });\n\n// const filtered = sortedItems.filter(item => {\n//   const email = item.json.customer_email || '';\n//   return /^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(email);\n// });\n\nreturn sortedItems;"
+      },
+      "name": "Sort data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        176
+      ],
+      "id": "88162287-5f69-4382-8f8d-26a31977dd0a"
+    },
+    {
+      "parameters": {
+        "operation": "toFile",
+        "options": {}
+      },
+      "name": "Export to Spreadsheet1",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        288
+      ],
+      "id": "9baaae95-2bec-4928-a3e9-88ae32b20872"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        64
+      ],
+      "id": "2824c1e9-67d2-4e5b-b435-d877a3617e9d",
+      "name": "Get first item"
+    },
+    {
+      "parameters": {
+        "content": "- Создаёт 400 записей с намеренными ошибками для тестирования\n\n- Включает невалидные email, отрицательные суммы, пустые значения",
+        "height": 416,
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        368,
+        -48
+      ],
+      "id": "1aa685e0-6cbd-4676-a977-61d99f253cac",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "# Оригинальынй workflow",
+        "height": 784,
+        "width": 3920,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        -1056
+      ],
+      "id": "18f86bbb-f695-41bf-9436-771419cf9029",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "Перемешивает все записи случайно",
+        "height": 336,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        656,
+        32
+      ],
+      "id": "0671c9cf-6613-4ed3-83ae-b0e4986f8415",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "- приводит email к lowercase и trim\n- конвертирует amount в число\n- нормализует currency и status\n- обрабатывает RUR → RUB",
+        "height": 336,
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        976,
+        32
+      ],
+      "id": "e9a4bb76-b7e7-475f-b5a1-53862e6a2fd1",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "- проверка наличия @\n- проверка формата email (regex)\n- сумма > 0\n- сумма не пустая\n",
+        "height": 336
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        32
+      ],
+      "id": "ad52abe6-8f07-4b46-8303-0ba9497e053d",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "фильтры по валюте (USD/EUR)",
+        "height": 336,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        32
+      ],
+      "id": "903c2e01-1f33-4970-8e98-f12411daa470",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "content": "Экспорт в excel файл",
+        "height": 224,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2112,
+        240
+      ],
+      "id": "8ea0cf45-c37a-4826-a24c-9edf0242ec63",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "content": "Берет 1й элемент",
+        "height": 192,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2112,
+        0
+      ],
+      "id": "d9eb7e30-432d-43fc-84b8-fd93c5081113",
+      "name": "Sticky Note20"
+    },
+    {
+      "parameters": {
+        "content": "Делает тестовый http запрос на  на httpbin.org",
+        "height": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2464,
+        0
+      ],
+      "id": "b787ffb6-97af-4e90-a31a-436206e465e3",
+      "name": "Sticky Note21"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Generate data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate data": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Process data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process data": {
+      "main": [
+        [
+          {
+            "node": "Set 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set 1": {
+      "main": [
+        [
+          {
+            "node": "Set 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set 2": {
+      "main": [
+        [
+          {
+            "node": "Set 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set 3": {
+      "main": [
+        [
+          {
+            "node": "IF 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF 1": {
+      "main": [
+        [
+          {
+            "node": "IF 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF 2": {
+      "main": [
+        [
+          {
+            "node": "IF 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF 3": {
+      "main": [
+        [
+          {
+            "node": "IF 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF 4": {
+      "main": [
+        [
+          {
+            "node": "IF 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF 5": {
+      "main": [
+        [
+          {
+            "node": "IF 6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF 6": {
+      "main": [
+        [
+          {
+            "node": "Set 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set 5": {
+      "main": [
+        [
+          {
+            "node": "Spreadsheet File 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Spreadsheet File 1": {
+      "main": [
+        [
+          {
+            "node": "Spreadsheet File 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate data1": {
+      "main": [
+        [
+          {
+            "node": "Sort data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize data": {
+      "main": [
+        [
+          {
+            "node": "Normalize data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate data": {
+      "main": [
+        [
+          {
+            "node": "Validate data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate data1": {
+      "main": [
+        [
+          {
+            "node": "Export to Spreadsheet1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get first item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize data1": {
+      "main": [
+        [
+          {
+            "node": "Validate data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort data": {
+      "main": [
+        [
+          {
+            "node": "Normalize data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Export to Spreadsheet1": {
+      "main": [
+        []
+      ]
+    },
+    "Get first item": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "132a767c-13b7-493e-8d81-fb0529c2cefe",
+  "meta": {
+    "instanceId": "7bf4365a2caf69d234372ccd82e383a907e8156da1ff89d7c67a0a2b010a4e3d"
+  },
+  "id": "zrVnsFK5jWklq4Yu",
+  "tags": []
+}
