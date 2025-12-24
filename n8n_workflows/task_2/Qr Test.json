@@ -232,42 +232,6 @@
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "1a8ade55-f728-4508-8979-16c84eecf0d8",
-              "name": "qr_x",
-              "value": "=707",
-              "type": "number"
-            },
-            {
-              "id": "6ee6cf44-20d6-404e-a54e-6fa75a89a878",
-              "name": "qr_y",
-              "value": "=304",
-              "type": "number"
-            },
-            {
-              "id": "97a97717-3745-4b81-9c79-5d4112a12530",
-              "name": "qr_size",
-              "value": "=200",
-              "type": "number"
-            }
-          ]
-        },
-        "includeOtherFields": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        3408,
-        2752
-      ],
-      "id": "c3724422-a673-4d32-93ad-86b194ae6196",
-      "name": "Edit Fields2"
-    },
-    {
-      "parameters": {
         "jsonSchemaExample": "{\n  \"qr_x\": 10,\n  \"qr_y\": 15,\n  \"qr_size\": 200,\n  \"image_width\": 12345,\n  \"image_height\": 23412,\n  \"use_background\": false,\n  \"reasoning\": \"1–2 коротких предложения\"\n}"
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
@@ -344,8 +308,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        5648,
-        2240
+        5632,
+        2384
       ]
     },
     {
@@ -923,7 +887,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "5b3bba04-52bf-4721-9379-e7af3818a058",
+  "versionId": "1ad56950-e6aa-477a-99ec-ef3a5337839c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "7bf4365a2caf69d234372ccd82e383a907e8156da1ff89d7c67a0a2b010a4e3d"
